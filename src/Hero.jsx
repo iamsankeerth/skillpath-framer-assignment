@@ -26,136 +26,149 @@ export default function Hero() {
 
   useLayoutEffect(() => {
     const root = rootRef.current
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
-    if (!root || reducedMotion) return undefined
+    if (!root) return undefined
 
-    const finePointer = window.matchMedia("(pointer: fine)").matches
-    let movePinwheelX
-    let movePinwheelY
-    let moveRibbonX
-    let moveRibbonY
-    let tiltRibbonX
-    let tiltRibbonY
-    let settleTimer
+    const media = gsap.matchMedia()
 
-    const context = gsap.context(() => {
-      const timeline = gsap.timeline({ defaults: { ease: "power3.out" } })
+    media.add({
+      reduceMotion: "(prefers-reduced-motion: reduce)",
+      allowMotion: "(prefers-reduced-motion: no-preference)",
+    }, (mediaContext) => {
+      const { reduceMotion } = mediaContext.conditions
 
-      timeline
-        .from(".announcement__inner", { y: -14, opacity: 0, duration: 0.35 }, 0)
-        .from(".site-header", { y: -14, opacity: 0, duration: 0.45 }, 0)
-        .from(".hero-word__inner", { yPercent: 112, duration: 0.72, stagger: 0.08 }, 0.08)
-        .from(".hero-art", { scale: 0.7, rotate: -24, opacity: 0, duration: 0.58 }, 0.3)
-        .from(".hero-support", { y: 14, opacity: 0, duration: 0.42 }, 0.48)
-        .from(".hero-cta", { y: 14, opacity: 0, duration: 0.42 }, 0.56)
+      const finePointer = window.matchMedia("(pointer: fine)").matches
+      let movePinwheelX
+      let movePinwheelY
+      let moveRibbonX
+      let moveRibbonY
+      let tiltRibbonX
+      let tiltRibbonY
+      let settleTimer
 
-      gsap.to(pinwheelRef.current, {
-        rotation: 360,
-        duration: 18,
-        repeat: -1,
-        ease: "none",
-      })
+      const context = gsap.context(() => {
+        gsap.to(".windmill", {
+          rotation: 360,
+          duration: reduceMotion ? 7.2 : 3.6,
+        })
 
-      const bodyPaths = gsap.utils.toArray(".hero-ribbon__body-path")
-      const bridgePaths = gsap.utils.toArray(".hero-ribbon__bridge-path")
-      const morphTimeline = gsap.timeline({ repeat: -1 })
+        if (reduceMotion) return
 
-      ribbonPaths.slice(1).forEach((path, index) => {
-        const duration = morphDurations[index]
+        const timeline = gsap.timeline({ defaults: { ease: "power3.out" } })
+
+        timeline
+          .from(".announcement__inner", { y: -14, opacity: 0, duration: 0.35 }, 0)
+          .from(".site-header", { y: -14, opacity: 0, duration: 0.45 }, 0)
+          .from(".hero-word__inner", { yPercent: 112, duration: 0.72, stagger: 0.08 }, 0.08)
+          .from(".hero-pinwheel", { scale: 0.7, opacity: 0, duration: 0.58 }, 0.3)
+          .from(".hero-ribbon", { scale: 0.7, rotate: -24, opacity: 0, duration: 0.58 }, 0.3)
+          .from(".hero-support", { y: 14, opacity: 0, duration: 0.42 }, 0.48)
+          .from(".hero-cta", { y: 14, opacity: 0, duration: 0.42 }, 0.56)
+
+        const bodyPaths = gsap.utils.toArray(".hero-ribbon__body-path")
+        const bridgePaths = gsap.utils.toArray(".hero-ribbon__bridge-path")
+        const morphTimeline = gsap.timeline({ repeat: -1 })
+
+        ribbonPaths.slice(1).forEach((path, index) => {
+          const duration = morphDurations[index]
+
+          morphTimeline
+            .to(bodyPaths, { attr: { d: path }, duration, ease: "sine.inOut" })
+            .to(
+              bridgePaths,
+              { attr: { d: ribbonBridgePaths[index + 1] }, duration, ease: "sine.inOut" },
+              "<",
+            )
+        })
 
         morphTimeline
-          .to(bodyPaths, { attr: { d: path }, duration, ease: "sine.inOut" })
-          .to(
-            bridgePaths,
-            { attr: { d: ribbonBridgePaths[index + 1] }, duration, ease: "sine.inOut" },
-            "<",
-          )
-      })
-
-      morphTimeline
-        .to(bodyPaths, {
-          attr: { d: ribbonPaths[0] },
-          duration: morphDurations[3],
-          ease: "sine.inOut",
-        })
-        .to(
-          bridgePaths,
-          {
-            attr: { d: ribbonBridgePaths[0] },
+          .to(bodyPaths, {
+            attr: { d: ribbonPaths[0] },
             duration: morphDurations[3],
             ease: "sine.inOut",
-          },
-          "<",
-        )
+          })
+          .to(
+            bridgePaths,
+            {
+              attr: { d: ribbonBridgePaths[0] },
+              duration: morphDurations[3],
+              ease: "sine.inOut",
+            },
+            "<",
+          )
 
-      gsap
-        .timeline({ repeat: -1 })
-        .to(".hero-ribbon__float", { rotation: -4, x: 3, y: -4, duration: 4.7, ease: "sine.inOut" })
-        .to(".hero-ribbon__float", { rotation: -11, x: -2, y: 2, duration: 5.4, ease: "sine.inOut" })
-        .to(".hero-ribbon__float", { rotation: -7, x: 0, y: 0, duration: 4.3, ease: "sine.inOut" })
+        gsap
+          .timeline({ repeat: -1 })
+          .to(".hero-ribbon__float", { rotation: -4, x: 3, y: -4, duration: 4.7, ease: "sine.inOut" })
+          .to(".hero-ribbon__float", { rotation: -11, x: -2, y: 2, duration: 5.4, ease: "sine.inOut" })
+          .to(".hero-ribbon__float", { rotation: -7, x: 0, y: 0, duration: 4.3, ease: "sine.inOut" })
 
-      gsap
-        .timeline({ repeat: -1, yoyo: true })
-        .to(".hero-ribbon__gradient", {
-          attr: { x1: 68, y1: 6, x2: 116, y2: 214 },
-          duration: 6.7,
+        gsap
+          .timeline({ repeat: -1, yoyo: true })
+          .to(".hero-ribbon__gradient", {
+            attr: { x1: 68, y1: 6, x2: 116, y2: 214 },
+            duration: 6.7,
+            ease: "sine.inOut",
+          })
+          .to(".hero-ribbon__gradient", {
+            attr: { x1: 26, y1: 36, x2: 154, y2: 176 },
+            duration: 5.9,
+            ease: "sine.inOut",
+          })
+
+        gsap.to(".hero-ribbon__sheen", {
+          strokeDashoffset: -286,
+          duration: 8.8,
+          repeat: -1,
+          yoyo: true,
           ease: "sine.inOut",
         })
-        .to(".hero-ribbon__gradient", {
-          attr: { x1: 26, y1: 36, x2: 154, y2: 176 },
-          duration: 5.9,
-          ease: "sine.inOut",
-        })
 
-      gsap.to(".hero-ribbon__sheen", {
-        strokeDashoffset: -286,
-        duration: 8.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      })
+        if (finePointer) {
+          movePinwheelX = gsap.quickTo(pinwheelRef.current, "x", { duration: 0.8, ease: "power3" })
+          movePinwheelY = gsap.quickTo(pinwheelRef.current, "y", { duration: 0.8, ease: "power3" })
+          moveRibbonX = gsap.quickTo(ribbonRef.current, "x", { duration: 0.95, ease: "power3" })
+          moveRibbonY = gsap.quickTo(ribbonRef.current, "y", { duration: 0.95, ease: "power3" })
+          tiltRibbonX = gsap.quickTo(ribbonRef.current, "rotationX", { duration: 1.1, ease: "power3" })
+          tiltRibbonY = gsap.quickTo(ribbonRef.current, "rotationY", { duration: 1.1, ease: "power3" })
+        }
+      }, root)
 
-      if (finePointer) {
-        movePinwheelX = gsap.quickTo(pinwheelRef.current, "x", { duration: 0.8, ease: "power3" })
-        movePinwheelY = gsap.quickTo(pinwheelRef.current, "y", { duration: 0.8, ease: "power3" })
-        moveRibbonX = gsap.quickTo(ribbonRef.current, "x", { duration: 0.95, ease: "power3" })
-        moveRibbonY = gsap.quickTo(ribbonRef.current, "y", { duration: 0.95, ease: "power3" })
-        tiltRibbonX = gsap.quickTo(ribbonRef.current, "rotationX", { duration: 1.1, ease: "power3" })
-        tiltRibbonY = gsap.quickTo(ribbonRef.current, "rotationY", { duration: 1.1, ease: "power3" })
+      if (reduceMotion) return () => context.revert()
+
+      const settleRibbon = () => {
+        moveRibbonX(0)
+        moveRibbonY(0)
+        tiltRibbonX(0)
+        tiltRibbonY(0)
       }
-    }, root)
 
-    const settleRibbon = () => {
-      moveRibbonX(0)
-      moveRibbonY(0)
-      tiltRibbonX(0)
-      tiltRibbonY(0)
-    }
+      const handlePointerMove = (event) => {
+        if (!finePointer) return
+        const bounds = root.getBoundingClientRect()
+        const x = (event.clientX - bounds.left) / bounds.width - 0.5
+        const y = (event.clientY - bounds.top) / bounds.height - 0.5
+        movePinwheelX(x * 24)
+        movePinwheelY(y * 18)
+        moveRibbonX(x * -18)
+        moveRibbonY(y * -10)
+        tiltRibbonX(y * -8)
+        tiltRibbonY(x * 10)
 
-    const handlePointerMove = (event) => {
-      if (!finePointer) return
-      const bounds = root.getBoundingClientRect()
-      const x = (event.clientX - bounds.left) / bounds.width - 0.5
-      const y = (event.clientY - bounds.top) / bounds.height - 0.5
-      movePinwheelX(x * 24)
-      movePinwheelY(y * 18)
-      moveRibbonX(x * -18)
-      moveRibbonY(y * -10)
-      tiltRibbonX(y * -8)
-      tiltRibbonY(x * 10)
+        window.clearTimeout(settleTimer)
+        settleTimer = window.setTimeout(settleRibbon, 220)
+      }
 
-      window.clearTimeout(settleTimer)
-      settleTimer = window.setTimeout(settleRibbon, 220)
-    }
+      root.addEventListener("pointermove", handlePointerMove)
 
-    root.addEventListener("pointermove", handlePointerMove)
+      return () => {
+        window.clearTimeout(settleTimer)
+        root.removeEventListener("pointermove", handlePointerMove)
+        context.revert()
+      }
+    })
 
-    return () => {
-      window.clearTimeout(settleTimer)
-      root.removeEventListener("pointermove", handlePointerMove)
-      context.revert()
-    }
+    return () => media.revert()
   }, [])
 
   const closeMenu = () => setMenuOpen(false)
@@ -233,10 +246,21 @@ export default function Hero() {
         </h1>
 
         <div className="hero-art hero-pinwheel" ref={pinwheelRef} aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
+          <svg className="windmill" viewBox="0 0 120 120" role="presentation">
+            <defs>
+              <linearGradient id="windmill-gradient" x1="18" y1="12" x2="102" y2="108" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="var(--color-orange)" />
+                <stop offset="0.58" stopColor="#ff9ea8" />
+                <stop offset="1" stopColor="var(--color-pink)" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#windmill-gradient)">
+              <path d="M60 60 L35 34 C46 25 58 16 72 6 C83 27 78 48 60 60 Z" />
+              <path d="M60 60 L35 34 C46 25 58 16 72 6 C83 27 78 48 60 60 Z" transform="rotate(90 60 60)" />
+              <path d="M60 60 L35 34 C46 25 58 16 72 6 C83 27 78 48 60 60 Z" transform="rotate(180 60 60)" />
+              <path d="M60 60 L35 34 C46 25 58 16 72 6 C83 27 78 48 60 60 Z" transform="rotate(270 60 60)" />
+            </g>
+          </svg>
         </div>
 
         <div className="hero-art hero-ribbon" ref={ribbonRef} aria-hidden="true">

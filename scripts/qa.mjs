@@ -106,6 +106,8 @@ async function inspectViewport(name, viewport, colorScheme = "dark") {
     ).length,
     ribbonLayers: document.querySelectorAll(".hero-ribbon path").length,
     ribbonBox: document.querySelector(".hero-ribbon")?.getBoundingClientRect().toJSON(),
+    windmillBlades: document.querySelectorAll(".windmill path").length,
+    windmillBox: document.querySelector(".windmill")?.getBoundingClientRect().toJSON(),
     titleBox: document.querySelector("#hero-title")?.getBoundingClientRect().toJSON(),
     supportBox: document.querySelector(".hero-support")?.getBoundingClientRect().toJSON(),
     ctaBox: document.querySelector(".hero-cta")?.getBoundingClientRect().toJSON(),
@@ -115,6 +117,7 @@ async function inspectViewport(name, viewport, colorScheme = "dark") {
 
   if (name === "mobile") {
     await page.locator(".menu-button").click()
+    await page.locator(".mobile-nav").waitFor({ state: "visible" })
     result.mobileMenuVisible = await page.locator(".mobile-nav").evaluate(
       (node) => getComputedStyle(node).visibility === "visible",
     )
@@ -174,8 +177,14 @@ async function inspectMotionPreferences() {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" })
     await page.locator(".hero-ribbon__body").waitFor()
     const before = await page.locator(".hero-ribbon__body").getAttribute("d")
+    const windmillBefore = await page.locator(".windmill").evaluate(
+      (node) => getComputedStyle(node).transform,
+    )
     await page.waitForTimeout(700)
     const after = await page.locator(".hero-ribbon__body").getAttribute("d")
+    const windmillAfter = await page.locator(".windmill").evaluate(
+      (node) => getComputedStyle(node).transform,
+    )
     const screenshotPath = join(tmpdir(), `skillpath-${reducedMotion}-${colorScheme}.png`)
     await page.screenshot({ path: screenshotPath })
 
@@ -185,6 +194,7 @@ async function inspectMotionPreferences() {
       ribbonVisible: document.querySelector(".hero-ribbon")?.getBoundingClientRect().width > 0,
     }))
     result.ribbonAnimated = before !== after
+    result.windmillAnimated = windmillBefore !== windmillAfter
     result.screenshotPath = screenshotPath
 
     await context.close()
@@ -247,6 +257,7 @@ try {
     if (result.courseCards !== mockCourses.length) failures.push(`${name}: course cards missing`)
     if (result.ribbonLayers !== 7) failures.push(`${name}: sculpture layers missing`)
     if (!result.ribbonAnimated) failures.push(`${name}: ribbon animation did not advance`)
+    if (result.windmillBlades !== 4) failures.push(`${name}: windmill blades are missing`)
     if (result.approximateFrameRate < 45) failures.push(`${name}: animation frame rate was too low`)
   }
   if (!desktop.pointerResponded || !desktop.pointerSettled) {
@@ -270,10 +281,14 @@ try {
   if (motionPreferences.reduced.ribbonAnimated) {
     failures.push("reduced motion: sculpture continued morphing")
   }
+  if (!motionPreferences.reduced.windmillAnimated) {
+    failures.push("reduced motion: windmill did not use its slower tween")
+  }
   if (
     motionPreferences.lightScheme.scheme !== "light" ||
     !motionPreferences.lightScheme.ribbonVisible ||
-    !motionPreferences.lightScheme.ribbonAnimated
+    !motionPreferences.lightScheme.ribbonAnimated ||
+    !motionPreferences.lightScheme.windmillAnimated
   ) {
     failures.push("light scheme: sculpture did not render or animate")
   }
