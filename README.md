@@ -9,6 +9,12 @@ The component is intended to load courses from live APIs while keeping each pric
 - [Functional plan](./PLAN.md)
 - [Domain glossary](./CONTEXT.md)
 
+## Repository Structure
+
+- `README.md` provides the project overview and current status.
+- `PLAN.md` records the agreed functional behavior and acceptance criteria.
+- `CONTEXT.md` defines the domain language used throughout the implementation.
+
 ## Status
 
 The functional requirements and data behavior are documented. Component implementation and Framer verification are the next milestones.
