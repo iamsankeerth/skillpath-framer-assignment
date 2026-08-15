@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { RefreshCw, Search, X } from "lucide-react"
+import { ChevronDown, RefreshCw, Search, X } from "lucide-react"
 import {
   fetchCourses,
   fetchPricingRegion,
@@ -235,19 +235,22 @@ export default function CourseCatalog({
 
             <label className="catalog-field catalog-sort">
               <span>Sort courses</span>
-              <select
-                value={sortOrder}
-                onChange={(event) => setSortOrder(event.target.value)}
-                disabled={coursesState.status === "loading"}
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low" disabled={pricingState.status !== "success"}>
-                  Price: Low to High
-                </option>
-                <option value="price-high" disabled={pricingState.status !== "success"}>
-                  Price: High to Low
-                </option>
-              </select>
+              <span className="catalog-sort__control">
+                <select
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value)}
+                  disabled={coursesState.status === "loading"}
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-low" disabled={pricingState.status !== "success"}>
+                    Price: Low to High
+                  </option>
+                  <option value="price-high" disabled={pricingState.status !== "success"}>
+                    Price: High to Low
+                  </option>
+                </select>
+                <ChevronDown className="catalog-sort__icon" size={18} strokeWidth={2.25} aria-hidden="true" />
+              </span>
             </label>
           </div>
         ) : null}

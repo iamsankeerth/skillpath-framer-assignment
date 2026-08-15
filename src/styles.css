@@ -214,7 +214,13 @@ button {
 
 .windmill {
   transform-origin: center;
+  transform-box: fill-box;
+  shape-rendering: geometricPrecision;
   will-change: transform;
+}
+
+.windmill path {
+  vector-effect: non-scaling-stroke;
 }
 
 .hero-ribbon {
@@ -409,14 +415,30 @@ button {
   cursor: pointer;
 }
 
+.catalog-sort__control {
+  position: relative;
+  display: grid;
+}
+
 .catalog-sort select {
+  width: 100%;
   min-height: 50px;
-  padding: 0 42px 0 16px;
+  padding: 0 48px 0 16px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-cream);
   background: var(--color-panel);
+  appearance: none;
   cursor: pointer;
+}
+
+.catalog-sort__icon {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  color: var(--color-cream);
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .catalog-sort select:disabled,

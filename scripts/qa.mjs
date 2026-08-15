@@ -5,6 +5,27 @@ import { tmpdir } from "node:os"
 const baseUrl = process.env.QA_URL || "http://127.0.0.1:4173/"
 const browser = await chromium.launch({ headless: true })
 
+const readPinwheelState = () => {
+  const windmill = document.querySelector(".windmill")
+  const blades = [...document.querySelectorAll(".windmill path")]
+  const bounds = windmill.querySelector("g")?.getBBox()
+
+  return {
+    transform: getComputedStyle(windmill).transform,
+    paths: blades.map((blade) => blade.getAttribute("d")),
+    bladeTransforms: blades.map((blade) => blade.getAttribute("transform")),
+    sharedCenter: blades.every((blade) => {
+      const path = blade.getAttribute("d") || ""
+      return path.startsWith("M60 60") && path.includes("60 60 Z")
+    }),
+    bounds: bounds ? { width: bounds.width, height: bounds.height } : null,
+    bladeBounds: blades.map((blade) => {
+      const box = blade.getBBox()
+      return { width: box.width, height: box.height }
+    }),
+  }
+}
+
 const mockCourses = [
   {
     courseName: "Product Strategy",
@@ -112,6 +133,7 @@ async function inspectViewport(name, viewport, colorScheme = "dark") {
     supportBox: document.querySelector(".hero-support")?.getBoundingClientRect().toJSON(),
     ctaBox: document.querySelector(".hero-cta")?.getBoundingClientRect().toJSON(),
   }))
+  result.pinwheelRest = await page.evaluate(readPinwheelState)
   result.ribbonAnimated = ribbonBefore !== ribbonAfter
   result.approximateFrameRate = approximateFrameRate
 
@@ -124,14 +146,29 @@ async function inspectViewport(name, viewport, colorScheme = "dark") {
   } else {
     const ribbon = page.locator(".hero-ribbon")
     const neutralTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
+    const pinwheelNeutral = await page.evaluate(readPinwheelState)
     const heroBox = await page.locator(".hero").boundingBox()
     await page.mouse.move(heroBox.x + heroBox.width * 0.88, heroBox.y + heroBox.height * 0.22)
-    await page.waitForTimeout(240)
+    await page.waitForTimeout(110)
     const activeTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
-    await page.waitForTimeout(1500)
+    const pinwheelActive = await page.evaluate(readPinwheelState)
+    await page.waitForTimeout(1800)
     const settledTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
+    const pinwheelSettled = await page.evaluate(readPinwheelState)
+    await page.waitForTimeout(400)
+    const pinwheelIdle = await page.evaluate(readPinwheelState)
     result.pointerResponded = neutralTransform !== activeTransform
     result.pointerSettled = activeTransform !== settledTransform
+    result.pinwheelMorphResponded = pinwheelNeutral.paths.some(
+      (path, index) => path !== pinwheelActive.paths[index],
+    )
+    result.pinwheelTransformResponded = pinwheelNeutral.transform !== pinwheelActive.transform
+    result.pinwheelReturned = pinwheelNeutral.paths.every(
+      (path, index) => path === pinwheelSettled.paths[index],
+    ) && pinwheelNeutral.transform === pinwheelSettled.transform
+    result.pinwheelIdleStatic = pinwheelSettled.paths.every(
+      (path, index) => path === pinwheelIdle.paths[index],
+    ) && pinwheelSettled.transform === pinwheelIdle.transform
 
     const search = page.locator(".catalog-search input")
     await search.fill("Instructor-led")
@@ -177,14 +214,14 @@ async function inspectMotionPreferences() {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" })
     await page.locator(".hero-ribbon__body").waitFor()
     const before = await page.locator(".hero-ribbon__body").getAttribute("d")
-    const windmillBefore = await page.locator(".windmill").evaluate(
-      (node) => getComputedStyle(node).transform,
-    )
+    const windmillBefore = await page.evaluate(readPinwheelState)
     await page.waitForTimeout(700)
     const after = await page.locator(".hero-ribbon__body").getAttribute("d")
-    const windmillAfter = await page.locator(".windmill").evaluate(
-      (node) => getComputedStyle(node).transform,
-    )
+    const windmillAfter = await page.evaluate(readPinwheelState)
+    const heroBox = await page.locator(".hero").boundingBox()
+    await page.mouse.move(heroBox.x + heroBox.width * 0.82, heroBox.y + heroBox.height * 0.24)
+    await page.waitForTimeout(110)
+    const windmillPointer = await page.evaluate(readPinwheelState)
     const screenshotPath = join(tmpdir(), `skillpath-${reducedMotion}-${colorScheme}.png`)
     await page.screenshot({ path: screenshotPath })
 
@@ -194,7 +231,12 @@ async function inspectMotionPreferences() {
       ribbonVisible: document.querySelector(".hero-ribbon")?.getBoundingClientRect().width > 0,
     }))
     result.ribbonAnimated = before !== after
-    result.windmillAnimated = windmillBefore !== windmillAfter
+    result.windmillIdleAnimated = windmillBefore.paths.some(
+      (path, index) => path !== windmillAfter.paths[index],
+    ) || windmillBefore.transform !== windmillAfter.transform
+    result.windmillPointerAnimated = windmillAfter.paths.some(
+      (path, index) => path !== windmillPointer.paths[index],
+    ) || windmillAfter.transform !== windmillPointer.transform
     result.screenshotPath = screenshotPath
 
     await context.close()
@@ -258,10 +300,30 @@ try {
     if (result.ribbonLayers !== 7) failures.push(`${name}: sculpture layers missing`)
     if (!result.ribbonAnimated) failures.push(`${name}: ribbon animation did not advance`)
     if (result.windmillBlades !== 4) failures.push(`${name}: windmill blades are missing`)
+    if (!result.pinwheelRest.sharedCenter) failures.push(`${name}: windmill blades do not share one center`)
+    if (
+      !result.pinwheelRest.bounds ||
+      Math.abs(result.pinwheelRest.bounds.width / result.pinwheelRest.bounds.height - 1) > 0.05
+    ) {
+      failures.push(`${name}: windmill footprint is not square`)
+    }
+    if (result.pinwheelRest.bladeBounds.some(
+      (box) => Math.min(box.width, box.height) < 45 || Math.max(box.width, box.height) < 55,
+    )) {
+      failures.push(`${name}: windmill blades are too narrow`)
+    }
     if (result.approximateFrameRate < 45) failures.push(`${name}: animation frame rate was too low`)
   }
   if (!desktop.pointerResponded || !desktop.pointerSettled) {
     failures.push("desktop: sculpture pointer inertia failed")
+  }
+  if (
+    !desktop.pinwheelMorphResponded ||
+    !desktop.pinwheelTransformResponded ||
+    !desktop.pinwheelReturned ||
+    !desktop.pinwheelIdleStatic
+  ) {
+    failures.push("desktop: pinwheel morph, inertia, return, or idle state failed")
   }
   if (!mobile.mobileMenuVisible) failures.push("mobile: menu did not open")
   if (desktop.filteredCount !== 1 || desktop.filteredSummary !== "1 of 3 courses") {
@@ -281,14 +343,15 @@ try {
   if (motionPreferences.reduced.ribbonAnimated) {
     failures.push("reduced motion: sculpture continued morphing")
   }
-  if (!motionPreferences.reduced.windmillAnimated) {
-    failures.push("reduced motion: windmill did not use its slower tween")
+  if (motionPreferences.reduced.windmillIdleAnimated || motionPreferences.reduced.windmillPointerAnimated) {
+    failures.push("reduced motion: pinwheel continued moving")
   }
   if (
     motionPreferences.lightScheme.scheme !== "light" ||
     !motionPreferences.lightScheme.ribbonVisible ||
     !motionPreferences.lightScheme.ribbonAnimated ||
-    !motionPreferences.lightScheme.windmillAnimated
+    motionPreferences.lightScheme.windmillIdleAnimated ||
+    !motionPreferences.lightScheme.windmillPointerAnimated
   ) {
     failures.push("light scheme: sculpture did not render or animate")
   }
