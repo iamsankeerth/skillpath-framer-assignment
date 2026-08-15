@@ -1,0 +1,13 @@
+# Original assignment material is not redistributed publicly.
+Assignment for the junior developer role.pdf
+
+# JavaScript build output and dependencies
+node_modules/
+dist/
+coverage/
+
+# Local configuration and logs
+.env
+.env.*
+!.env.example
+*.log
