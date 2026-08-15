@@ -220,31 +220,41 @@ button {
 .hero-pinwheel span:nth-child(4) { transform: rotate(270deg); }
 
 .hero-ribbon {
-  right: 28%;
-  bottom: 104px;
-  width: 94px;
-  height: 154px;
-  transform: rotate(-18deg);
+  right: 27%;
+  bottom: 84px;
+  width: 132px;
+  height: 190px;
+  perspective: 700px;
+  transform-style: preserve-3d;
 }
 
-.hero-ribbon span {
-  position: absolute;
-  width: 42px;
-  height: 54px;
-  border: 1px solid rgba(255, 252, 225, 0.08);
-  border-radius: 72% 20% 72% 20%;
+.hero-ribbon__float,
+.hero-ribbon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hero-ribbon__float {
+  transform: rotate(-7deg);
+  transform-style: preserve-3d;
   transform-origin: center;
-  background: linear-gradient(145deg, var(--color-blue), var(--color-lilac) 56%, var(--color-pink));
+  will-change: transform;
 }
 
-.hero-ribbon span:nth-child(1) { top: 0; left: 34px; transform: rotate(-35deg); }
-.hero-ribbon span:nth-child(2) { top: 24px; left: 8px; transform: rotate(31deg); }
-.hero-ribbon span:nth-child(3) { top: 50px; left: 40px; transform: rotate(-31deg); }
-.hero-ribbon span:nth-child(4) { top: 77px; left: 11px; transform: rotate(29deg); }
-.hero-ribbon span:nth-child(5) { top: 103px; left: 37px; transform: rotate(-27deg); }
+.hero-ribbon__body,
+.hero-ribbon__bridge,
+.hero-ribbon__sheen {
+  vector-effect: non-scaling-stroke;
+}
 
-.hero-ribbon span:nth-child(even) {
-  background: linear-gradient(215deg, var(--color-pink), var(--color-lilac) 50%, var(--color-blue));
+.hero-ribbon__body,
+.hero-ribbon__bridge {
+  filter: saturate(1.08);
+}
+
+.hero-ribbon__sheen {
+  mix-blend-mode: screen;
 }
 
 .hero-support {
@@ -812,23 +822,21 @@ button {
   }
 
   .hero-ribbon {
-    top: 260px;
-    right: 31%;
+    top: 235px;
+    right: 27%;
     bottom: auto;
-    width: 62px;
-    height: 106px;
+    width: 92px;
+    height: 132px;
   }
 
-  .hero-ribbon span {
-    width: 29px;
-    height: 38px;
+  .hero-ribbon__aura {
+    display: none;
   }
 
-  .hero-ribbon span:nth-child(1) { left: 22px; }
-  .hero-ribbon span:nth-child(2) { top: 17px; left: 3px; }
-  .hero-ribbon span:nth-child(3) { top: 35px; left: 26px; }
-  .hero-ribbon span:nth-child(4) { top: 53px; left: 5px; }
-  .hero-ribbon span:nth-child(5) { top: 71px; left: 24px; }
+  .hero-ribbon__depth {
+    filter: none;
+    opacity: 0.26;
+  }
 
   .hero-support {
     top: 360px;
@@ -899,7 +907,7 @@ button {
   }
 
   .hero-ribbon {
-    top: 236px;
+    top: 218px;
   }
 
   .hero-support {

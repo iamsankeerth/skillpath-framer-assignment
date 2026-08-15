@@ -41,8 +41,8 @@ const mockCourses = [
   },
 ]
 
-async function inspectViewport(name, viewport) {
-  const context = await browser.newContext({ viewport, reducedMotion: "no-preference" })
+async function inspectViewport(name, viewport, colorScheme = "dark") {
+  const context = await browser.newContext({ viewport, reducedMotion: "no-preference", colorScheme })
   const page = await context.newPage()
   const consoleErrors = []
   const pageErrors = []
@@ -68,16 +68,31 @@ async function inspectViewport(name, viewport) {
   await page.locator(".course-card:not(.course-card--skeleton)").first().waitFor()
   await page.waitForTimeout(2600)
 
-  const ribbonBefore = await page.locator(".hero-ribbon span").evaluateAll((nodes) =>
-    nodes.map((node) => getComputedStyle(node).transform),
-  )
+  const ribbonBefore = await page.locator(".hero-ribbon__body").getAttribute("d")
   await page.waitForTimeout(350)
-  const ribbonAfter = await page.locator(".hero-ribbon span").evaluateAll((nodes) =>
-    nodes.map((node) => getComputedStyle(node).transform),
-  )
+  const ribbonAfter = await page.locator(".hero-ribbon__body").getAttribute("d")
 
   const screenshotPath = join(tmpdir(), `skillpath-${name}.png`)
   await page.screenshot({ path: screenshotPath, fullPage: true })
+
+  const approximateFrameRate = await page.evaluate(() =>
+    new Promise((resolve) => {
+      let frames = 0
+      const startedAt = performance.now()
+
+      const sample = (now) => {
+        frames += 1
+        if (now - startedAt < 900) {
+          requestAnimationFrame(sample)
+          return
+        }
+
+        resolve(Math.round((frames * 1000) / (now - startedAt)))
+      }
+
+      requestAnimationFrame(sample)
+    }),
+  )
 
   const result = await page.evaluate(() => ({
     heroText: document.querySelector("#hero-title")?.textContent?.replace(/\s+/g, " ").trim(),
@@ -89,12 +104,14 @@ async function inspectViewport(name, viewport) {
     pricingUnavailable: [...document.querySelectorAll(".course-price")].filter((node) =>
       node.textContent.includes("Price unavailable"),
     ).length,
-    ribbonSegments: document.querySelectorAll(".hero-ribbon span").length,
+    ribbonLayers: document.querySelectorAll(".hero-ribbon path").length,
+    ribbonBox: document.querySelector(".hero-ribbon")?.getBoundingClientRect().toJSON(),
     titleBox: document.querySelector("#hero-title")?.getBoundingClientRect().toJSON(),
     supportBox: document.querySelector(".hero-support")?.getBoundingClientRect().toJSON(),
     ctaBox: document.querySelector(".hero-cta")?.getBoundingClientRect().toJSON(),
   }))
-  result.ribbonAnimated = ribbonBefore.some((transform, index) => transform !== ribbonAfter[index])
+  result.ribbonAnimated = ribbonBefore !== ribbonAfter
+  result.approximateFrameRate = approximateFrameRate
 
   if (name === "mobile") {
     await page.locator(".menu-button").click()
@@ -102,6 +119,17 @@ async function inspectViewport(name, viewport) {
       (node) => getComputedStyle(node).visibility === "visible",
     )
   } else {
+    const ribbon = page.locator(".hero-ribbon")
+    const neutralTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
+    const heroBox = await page.locator(".hero").boundingBox()
+    await page.mouse.move(heroBox.x + heroBox.width * 0.88, heroBox.y + heroBox.height * 0.22)
+    await page.waitForTimeout(240)
+    const activeTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
+    await page.waitForTimeout(1500)
+    const settledTransform = await ribbon.evaluate((node) => getComputedStyle(node).transform)
+    result.pointerResponded = neutralTransform !== activeTransform
+    result.pointerSettled = activeTransform !== settledTransform
+
     const search = page.locator(".catalog-search input")
     await search.fill("Instructor-led")
     result.filteredCount = await page.locator(".course-card:not(.course-card--skeleton)").count()
@@ -125,6 +153,48 @@ async function inspectViewport(name, viewport) {
 
   await context.close()
   return result
+}
+
+async function inspectMotionPreferences() {
+  const inspect = async (reducedMotion, colorScheme) => {
+    const context = await browser.newContext({
+      viewport: { width: 1100, height: 800 },
+      reducedMotion,
+      colorScheme,
+    })
+    const page = await context.newPage()
+
+    await page.route("**/assignment/course-data", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockCourses) }),
+    )
+    await page.route("**/assignment/country-code", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: '{"country_code":"IN"}' }),
+    )
+
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" })
+    await page.locator(".hero-ribbon__body").waitFor()
+    const before = await page.locator(".hero-ribbon__body").getAttribute("d")
+    await page.waitForTimeout(700)
+    const after = await page.locator(".hero-ribbon__body").getAttribute("d")
+    const screenshotPath = join(tmpdir(), `skillpath-${reducedMotion}-${colorScheme}.png`)
+    await page.screenshot({ path: screenshotPath })
+
+    const result = await page.evaluate(() => ({
+      scheme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+      canvas: getComputedStyle(document.body).backgroundColor,
+      ribbonVisible: document.querySelector(".hero-ribbon")?.getBoundingClientRect().width > 0,
+    }))
+    result.ribbonAnimated = before !== after
+    result.screenshotPath = screenshotPath
+
+    await context.close()
+    return result
+  }
+
+  return {
+    reduced: await inspect("reduce", "dark"),
+    lightScheme: await inspect("no-preference", "light"),
+  }
 }
 
 async function inspectPricingFailure() {
@@ -155,7 +225,8 @@ try {
   const desktop = await inspectViewport("desktop", { width: 1440, height: 900 })
   const mobile = await inspectViewport("mobile", { width: 390, height: 844 })
   const pricingFailure = await inspectPricingFailure()
-  const results = { desktop, mobile, pricingFailure }
+  const motionPreferences = await inspectMotionPreferences()
+  const results = { desktop, mobile, pricingFailure, motionPreferences }
 
   const failures = []
   for (const [name, result] of Object.entries({ desktop, mobile })) {
@@ -174,8 +245,12 @@ try {
       failures.push(`${name}: browser errors detected`)
     }
     if (result.courseCards !== mockCourses.length) failures.push(`${name}: course cards missing`)
-    if (result.ribbonSegments !== 5) failures.push(`${name}: ribbon segments missing`)
+    if (result.ribbonLayers !== 7) failures.push(`${name}: sculpture layers missing`)
     if (!result.ribbonAnimated) failures.push(`${name}: ribbon animation did not advance`)
+    if (result.approximateFrameRate < 45) failures.push(`${name}: animation frame rate was too low`)
+  }
+  if (!desktop.pointerResponded || !desktop.pointerSettled) {
+    failures.push("desktop: sculpture pointer inertia failed")
   }
   if (!mobile.mobileMenuVisible) failures.push("mobile: menu did not open")
   if (desktop.filteredCount !== 1 || desktop.filteredSummary !== "1 of 3 courses") {
@@ -191,6 +266,16 @@ try {
     pricingFailure.pricingRetryActions !== 1
   ) {
     failures.push("pricing failure: courses or retry behavior is incorrect")
+  }
+  if (motionPreferences.reduced.ribbonAnimated) {
+    failures.push("reduced motion: sculpture continued morphing")
+  }
+  if (
+    motionPreferences.lightScheme.scheme !== "light" ||
+    !motionPreferences.lightScheme.ribbonVisible ||
+    !motionPreferences.lightScheme.ribbonAnimated
+  ) {
+    failures.push("light scheme: sculpture did not render or animate")
   }
 
   console.log(JSON.stringify(results, null, 2))
