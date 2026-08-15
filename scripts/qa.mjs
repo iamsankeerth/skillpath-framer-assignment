@@ -68,6 +68,14 @@ async function inspectViewport(name, viewport) {
   await page.locator(".course-card:not(.course-card--skeleton)").first().waitFor()
   await page.waitForTimeout(2600)
 
+  const ribbonBefore = await page.locator(".hero-ribbon span").evaluateAll((nodes) =>
+    nodes.map((node) => getComputedStyle(node).transform),
+  )
+  await page.waitForTimeout(350)
+  const ribbonAfter = await page.locator(".hero-ribbon span").evaluateAll((nodes) =>
+    nodes.map((node) => getComputedStyle(node).transform),
+  )
+
   const screenshotPath = join(tmpdir(), `skillpath-${name}.png`)
   await page.screenshot({ path: screenshotPath, fullPage: true })
 
@@ -81,10 +89,12 @@ async function inspectViewport(name, viewport) {
     pricingUnavailable: [...document.querySelectorAll(".course-price")].filter((node) =>
       node.textContent.includes("Price unavailable"),
     ).length,
+    ribbonSegments: document.querySelectorAll(".hero-ribbon span").length,
     titleBox: document.querySelector("#hero-title")?.getBoundingClientRect().toJSON(),
     supportBox: document.querySelector(".hero-support")?.getBoundingClientRect().toJSON(),
     ctaBox: document.querySelector(".hero-cta")?.getBoundingClientRect().toJSON(),
   }))
+  result.ribbonAnimated = ribbonBefore.some((transform, index) => transform !== ribbonAfter[index])
 
   if (name === "mobile") {
     await page.locator(".menu-button").click()
@@ -164,6 +174,8 @@ try {
       failures.push(`${name}: browser errors detected`)
     }
     if (result.courseCards !== mockCourses.length) failures.push(`${name}: course cards missing`)
+    if (result.ribbonSegments !== 5) failures.push(`${name}: ribbon segments missing`)
+    if (!result.ribbonAnimated) failures.push(`${name}: ribbon animation did not advance`)
   }
   if (!mobile.mobileMenuVisible) failures.push("mobile: menu did not open")
   if (desktop.filteredCount !== 1 || desktop.filteredSummary !== "1 of 3 courses") {

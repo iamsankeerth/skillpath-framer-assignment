@@ -14,6 +14,12 @@ export default function Hero() {
 
     if (!root || reducedMotion) return undefined
 
+    const finePointer = window.matchMedia("(pointer: fine)").matches
+    let movePinwheelX
+    let movePinwheelY
+    let moveRibbonX
+    let moveRibbonY
+
     const context = gsap.context(() => {
       const timeline = gsap.timeline({ defaults: { ease: "power3.out" } })
 
@@ -32,28 +38,32 @@ export default function Hero() {
         ease: "none",
       })
 
-      gsap.to(ribbonRef.current, {
-        y: -12,
-        rotation: 8,
-        duration: 2.4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
+      const ribbonSegments = gsap.utils.toArray(".hero-ribbon span")
+
+      ribbonSegments.forEach((segment, index) => {
+        const direction = index % 2 === 0 ? 1 : -1
+
+        gsap.to(segment, {
+          x: direction * (8 + index),
+          y: direction * -7,
+          rotation: `+=${direction * (12 + index * 2)}`,
+          scaleX: index % 2 === 0 ? 1.08 : 0.94,
+          scaleY: index % 2 === 0 ? 0.94 : 1.08,
+          duration: 1.15 + index * 0.09,
+          delay: index * 0.12,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        })
       })
+
+      if (finePointer) {
+        movePinwheelX = gsap.quickTo(pinwheelRef.current, "x", { duration: 0.8, ease: "power3" })
+        movePinwheelY = gsap.quickTo(pinwheelRef.current, "y", { duration: 0.8, ease: "power3" })
+        moveRibbonX = gsap.quickTo(ribbonRef.current, "x", { duration: 1, ease: "power3" })
+        moveRibbonY = gsap.quickTo(ribbonRef.current, "y", { duration: 1, ease: "power3" })
+      }
     }, root)
-
-    const finePointer = window.matchMedia("(pointer: fine)").matches
-    let movePinwheelX
-    let movePinwheelY
-    let moveRibbonX
-    let moveRibbonY
-
-    if (finePointer) {
-      movePinwheelX = gsap.quickTo(pinwheelRef.current, "x", { duration: 0.8, ease: "power3" })
-      movePinwheelY = gsap.quickTo(pinwheelRef.current, "y", { duration: 0.8, ease: "power3" })
-      moveRibbonX = gsap.quickTo(ribbonRef.current, "x", { duration: 1, ease: "power3" })
-      moveRibbonY = gsap.quickTo(ribbonRef.current, "y", { duration: 1, ease: "power3" })
-    }
 
     const handlePointerMove = (event) => {
       if (!finePointer) return
@@ -156,6 +166,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-art hero-ribbon" ref={ribbonRef} aria-hidden="true">
+          <span />
           <span />
           <span />
           <span />

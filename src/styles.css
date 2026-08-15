@@ -220,26 +220,32 @@ button {
 .hero-pinwheel span:nth-child(4) { transform: rotate(270deg); }
 
 .hero-ribbon {
-  right: 29%;
-  bottom: 118px;
-  width: 74px;
-  height: 126px;
-  transform: rotate(-23deg);
+  right: 28%;
+  bottom: 104px;
+  width: 94px;
+  height: 154px;
+  transform: rotate(-18deg);
 }
 
 .hero-ribbon span {
   position: absolute;
-  left: 18px;
-  width: 38px;
-  height: 62px;
-  border-radius: 30px 4px 30px 4px;
-  background: linear-gradient(145deg, var(--color-blue), var(--color-lilac) 48%, var(--color-pink));
+  width: 42px;
+  height: 54px;
+  border: 1px solid rgba(255, 252, 225, 0.08);
+  border-radius: 72% 20% 72% 20%;
+  transform-origin: center;
+  background: linear-gradient(145deg, var(--color-blue), var(--color-lilac) 56%, var(--color-pink));
 }
 
-.hero-ribbon span:nth-child(1) { top: 0; transform: rotate(-34deg); }
-.hero-ribbon span:nth-child(2) { top: 27px; left: 3px; transform: rotate(28deg); }
-.hero-ribbon span:nth-child(3) { top: 53px; left: 30px; transform: rotate(-32deg); }
-.hero-ribbon span:nth-child(4) { top: 80px; left: 13px; transform: rotate(25deg); }
+.hero-ribbon span:nth-child(1) { top: 0; left: 34px; transform: rotate(-35deg); }
+.hero-ribbon span:nth-child(2) { top: 24px; left: 8px; transform: rotate(31deg); }
+.hero-ribbon span:nth-child(3) { top: 50px; left: 40px; transform: rotate(-31deg); }
+.hero-ribbon span:nth-child(4) { top: 77px; left: 11px; transform: rotate(29deg); }
+.hero-ribbon span:nth-child(5) { top: 103px; left: 37px; transform: rotate(-27deg); }
+
+.hero-ribbon span:nth-child(even) {
+  background: linear-gradient(215deg, var(--color-pink), var(--color-lilac) 50%, var(--color-blue));
+}
 
 .hero-support {
   position: absolute;
@@ -806,22 +812,23 @@ button {
   }
 
   .hero-ribbon {
-    top: 274px;
-    right: 33%;
+    top: 260px;
+    right: 31%;
     bottom: auto;
-    width: 52px;
-    height: 90px;
+    width: 62px;
+    height: 106px;
   }
 
   .hero-ribbon span {
-    left: 13px;
-    width: 27px;
-    height: 44px;
+    width: 29px;
+    height: 38px;
   }
 
-  .hero-ribbon span:nth-child(2) { top: 20px; left: 2px; }
-  .hero-ribbon span:nth-child(3) { top: 39px; left: 21px; }
-  .hero-ribbon span:nth-child(4) { top: 58px; left: 9px; }
+  .hero-ribbon span:nth-child(1) { left: 22px; }
+  .hero-ribbon span:nth-child(2) { top: 17px; left: 3px; }
+  .hero-ribbon span:nth-child(3) { top: 35px; left: 26px; }
+  .hero-ribbon span:nth-child(4) { top: 53px; left: 5px; }
+  .hero-ribbon span:nth-child(5) { top: 71px; left: 24px; }
 
   .hero-support {
     top: 360px;
@@ -892,7 +899,7 @@ button {
   }
 
   .hero-ribbon {
-    top: 248px;
+    top: 236px;
   }
 
   .hero-support {
