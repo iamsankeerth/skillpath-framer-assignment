@@ -124,10 +124,6 @@ const ribbonPaths = [
     "M 72 20 C 119 14 153 44 137 74 C 120 106 69 112 53 81 C 38 51 117 55 139 96 C 160 136 126 171 89 168 C 51 166 37 126 69 106 C 101 86 140 134 112 195",
     "M 84 17 C 137 27 153 55 121 86 C 89 116 52 94 56 62 C 60 30 139 75 139 119 C 138 163 90 184 58 158 C 26 131 54 101 94 110 C 132 119 132 162 96 198",
 ]
-const bridgePaths = [
-    "M 62 58 C 91 48 131 76 136 107", "M 69 54 C 95 53 132 86 132 119",
-    "M 56 74 C 70 54 121 63 137 94", "M 63 57 C 86 49 130 75 138 110",
-]
 function interpolatePath(from, to, progress) {
     const numbers = /-?\d*\.?\d+/g, a = from.match(numbers).map(Number), b = to.match(numbers).map(Number)
     let index = 0
@@ -136,7 +132,7 @@ function interpolatePath(from, to, progress) {
 
 function HeroArt({ idPrefix }) {
     const stageRef = useRef(null), windmillRef = useRef(null), bladeRefs = useRef([]), ribbonRef = useRef(null)
-    const bodyRefs = useRef([]), bridgeRefs = useRef([])
+    const bodyRefs = useRef([])
     useEffect(() => {
         const stage = stageRef.current
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -176,7 +172,6 @@ function HeroArt({ idPrefix }) {
             const cycle = 4200, phase = (now % (cycle * 4)) / cycle, from = Math.floor(phase) % 4, to = (from + 1) % 4
             const t = (1 - Math.cos((phase % 1) * Math.PI)) / 2
             bodyRefs.current.forEach(path => path?.setAttribute("d", interpolatePath(ribbonPaths[from], ribbonPaths[to], t)))
-            bridgeRefs.current.forEach(path => path?.setAttribute("d", interpolatePath(bridgePaths[from], bridgePaths[to], t)))
             ribbonRef.current.style.transform = `translate3d(${ribbon.x}px,${ribbon.y + Math.sin(now / 1800) * 3}px,0) rotate(${Math.sin(now / 2300) * 3 - 7}deg)`
             frame = requestAnimationFrame(step)
         }
@@ -200,8 +195,6 @@ function HeroArt({ idPrefix }) {
             <path ref={node => bodyRefs.current[0] = node} d={ribbonPaths[0]} fill="none" stroke="#8f7cff" strokeWidth="34" strokeLinecap="round" opacity=".1" filter={`url(#${glow})`}/>
             <path ref={node => bodyRefs.current[1] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${ribbonGradient})`} strokeWidth="23" strokeLinecap="round"/>
             <path ref={node => bodyRefs.current[2] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${sheen})`} strokeWidth="4" strokeLinecap="round" strokeDasharray="46 240" opacity=".46"/>
-            <path ref={node => bridgeRefs.current[0] = node} d={bridgePaths[0]} fill="none" stroke="var(--sp-bg)" strokeWidth="29" strokeLinecap="round"/>
-            <path ref={node => bridgeRefs.current[1] = node} d={bridgePaths[0]} fill="none" stroke={`url(#${ribbonGradient})`} strokeWidth="23" strokeLinecap="round"/>
         </svg>
     </div>
 }
