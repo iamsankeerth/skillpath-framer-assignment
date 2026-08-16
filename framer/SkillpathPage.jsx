@@ -276,17 +276,21 @@ const styles = `
 .sp-title span{display:block}.sp-title span:last-child{text-align:right}
 .sp-pinwheel{position:absolute;width:clamp(110px,10cqw,170px);left:22%;top:-45px;transform-origin:center;will-change:transform}
 .sp-ribbon-row{display:flex;align-items:center;justify-content:flex-end;min-width:0;padding-right:18%}
-.sp-ribbon{position:static;width:clamp(72px,7cqw,104px);right:auto;top:auto;display:block;flex:none;will-change:transform}
+.sp-ribbon{position:static;width:clamp(90px,9cqw,128px);right:auto;top:auto;display:block;flex:none;will-change:transform}
 .sp-hero-bottom{display:flex;align-items:center;justify-content:space-between;gap:32px;min-width:0}
 .sp-support{position:static;display:flex;align-items:flex-start;gap:10px;max-width:630px;font-size:clamp(20px,2cqw,31px);line-height:1.2;margin:0;left:auto;right:auto;bottom:auto;min-width:0}
 .sp-support-brace{flex:none}.sp-support-copy{min-width:0}
 .sp-cta{position:static;right:auto;left:auto;bottom:auto;flex:none;border-color:var(--sp-brand);background:var(--sp-brand);color:#07110a;min-width:190px}
 
 @container (max-width:899px){
+  .sp-nav,.sp-header-action{display:none}
+  .sp-menu{display:grid}
+  .sp-mobile-nav{display:flex;position:absolute;z-index:10;top:90px;left:32px;right:32px;background:#171a18;border:1px solid var(--sp-line);padding:18px;flex-direction:column;gap:4px;transform:translateY(-10px);opacity:0;pointer-events:none}
+  .sp-mobile-nav[data-open=true]{transform:none;opacity:1;pointer-events:auto}.sp-mobile-nav a{padding:12px}
   .sp-hero{grid-template-rows:auto minmax(110px,1fr) auto;row-gap:14px;min-height:650px;padding:60px 32px 52px}
   .sp-title{font-size:clamp(64px,13cqw,104px)}
   .sp-pinwheel{width:clamp(100px,10cqw,140px);left:19%;top:-45px}
-  .sp-ribbon-row{padding-right:14%}.sp-ribbon{width:68px}
+  .sp-ribbon-row{padding-right:14%}.sp-ribbon{width:92px}
   .sp-hero-bottom{flex-direction:column;justify-content:flex-end;align-items:center;gap:28px;text-align:center}
   .sp-support{font-size:21px;justify-content:center}
 }
@@ -295,7 +299,7 @@ const styles = `
   .sp-hero{grid-template-rows:auto minmax(90px,1fr) auto;row-gap:12px;min-height:590px;padding:65px 24px 48px}
   .sp-title{font-size:clamp(46px,14cqw,68px);margin-top:0}.sp-title span:last-child{text-align:left;margin-top:16px}
   .sp-pinwheel{width:88px;left:12%;top:-57px}
-  .sp-ribbon-row{padding-right:10%}.sp-ribbon{width:58px}
+  .sp-ribbon-row{padding-right:10%}.sp-ribbon{width:76px}
   .sp-hero-bottom{gap:24px}.sp-support{width:100%;font-size:18px;text-align:left}.sp-cta{min-width:190px}
 }
 @media(prefers-reduced-motion:reduce){.sp-page *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
@@ -314,7 +318,7 @@ export default function SkillpathPage({ brandColor = "#0ae448", typography, styl
     return <div className="sp-page" id="home" style={rootStyle} data-framer-component="SkillpathPage">
         <style>{styles}</style>
         <aside className="sp-announcement" aria-label="Announcement">Learn without limits. Build what comes next.</aside>
-        <header className="sp-header"><a className="sp-brand" href="#home" aria-label="Skillpath home">Skillpath</a><nav className="sp-nav" aria-label="Primary navigation"><a href="#courses">Courses</a><a href="#about">Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav><a className="sp-header-action" href="#courses">Explore courses</a><button className="sp-menu" type="button" aria-expanded={menuOpen} aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(value => !value)}><Icon name={menuOpen ? "close" : "menu"} size={22}/></button><nav className="sp-mobile-nav" data-open={menuOpen} aria-label="Mobile navigation"><a href="#courses" onClick={() => setMenuOpen(false)}>Courses</a><a href="#about" onClick={() => setMenuOpen(false)}>Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav></header>
+        <header className="sp-header"><a className="sp-brand" href="#home" aria-label="Skillpath home">Skillpath</a><nav className="sp-nav" aria-label="Primary navigation"><a href="#courses">Courses</a><a href="#about">Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav><a className="sp-header-action" href="#courses">Explore courses</a><button className="sp-menu" type="button" aria-expanded={menuOpen} aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(value => !value)}><Icon name={menuOpen ? "close" : "menu"} size={22}/></button><nav className="sp-mobile-nav" data-open={menuOpen} hidden={!menuOpen} aria-label="Mobile navigation"><a href="#courses" onClick={() => setMenuOpen(false)}>Courses</a><a href="#about" onClick={() => setMenuOpen(false)}>Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav></header>
         <Hero idPrefix={uid}/>
         <main><Catalog/><section className="sp-about" id="about" aria-labelledby="sp-about-title"><p className="sp-kicker">{"{"} Why Skillpath {"}"}</p><div><h2 id="sp-about-title">Learning that keeps pace with where you are going.</h2><p>Clear course information, transparent regional pricing, and practical subjects make it easier to choose the right next step.</p></div></section></main>
         <footer className="sp-footer"><a className="sp-brand" href="#home">Skillpath</a><nav aria-label="Footer navigation"><a href="#home">Home</a><a href="#courses">Courses</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav><p>© 2026 Skillpath. Built for the Webveda assignment.</p></footer>
