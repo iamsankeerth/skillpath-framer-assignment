@@ -130,11 +130,11 @@ function interpolatePath(from, to, progress) {
     return from.replace(numbers, () => String(mix(a[index], b[index++], progress).toFixed(2)))
 }
 
-function HeroArt({ idPrefix }) {
-    const stageRef = useRef(null), windmillRef = useRef(null), bladeRefs = useRef([]), ribbonRef = useRef(null)
+function Hero({ idPrefix }) {
+    const heroRef = useRef(null), windmillRef = useRef(null), bladeRefs = useRef([]), ribbonRef = useRef(null)
     const bodyRefs = useRef([])
     useEffect(() => {
-        const stage = stageRef.current
+        const stage = heroRef.current
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
         const fine = window.matchMedia("(pointer: fine)").matches
         if (!stage || reduced) return
@@ -150,7 +150,10 @@ function HeroArt({ idPrefix }) {
             target.morph = .25 + Math.min(1, Math.hypot(target.x, target.y)) * .75
             target.rotation = clamp(target.x * 14 - target.y * 5, -18, 18)
             target.skew = clamp(target.y * -3, -4, 4)
-            ribbon.tx = target.x * -16; ribbon.ty = target.y * -9; idleAt = performance.now() + 180
+            const compact = box.width <= 899
+            ribbon.tx = target.x * (compact ? -6 : -16)
+            ribbon.ty = target.y * (compact ? -4 : -9)
+            idleAt = performance.now() + 180
         }
         const onLeave = () => { Object.keys(target).forEach(key => target[key] = 0); ribbon.tx = ribbon.ty = 0 }
         const step = now => {
@@ -181,22 +184,33 @@ function HeroArt({ idPrefix }) {
     }, [])
 
     const gradient = `${idPrefix}-pinwheel`, ribbonGradient = `${idPrefix}-ribbon`, sheen = `${idPrefix}-sheen`, glow = `${idPrefix}-glow`
-    return <div className="sp-art-stage" ref={stageRef} aria-hidden="true">
-        <svg className="sp-pinwheel" ref={windmillRef} viewBox="0 0 120 120">
-            <defs><linearGradient id={gradient} x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse"><stop stopColor="#ff8a0a"/><stop offset=".38" stopColor="#ffad8e"/><stop offset=".68" stopColor="#f2a3c8"/><stop offset="1" stopColor="#dda1ff"/></linearGradient></defs>
-            <g fill={`url(#${gradient})`}>{bladeAngles.map((angle, index) => <path key={angle} ref={node => bladeRefs.current[index] = node} d={bladePath(restShape, angle)}/>)}</g>
-        </svg>
-        <svg className="sp-ribbon" ref={ribbonRef} viewBox="0 0 180 220">
-            <defs>
-                <linearGradient id={ribbonGradient} x1="36" y1="18" x2="144" y2="198" gradientUnits="userSpaceOnUse"><stop stopColor="#54dcff"/><stop offset=".34" stopColor="#7288ff"/><stop offset=".68" stopColor="#ad7cff"/><stop offset="1" stopColor="#ff8fc7"/></linearGradient>
-                <linearGradient id={sheen} x1="38" y1="12" x2="137" y2="202" gradientUnits="userSpaceOnUse"><stop stopColor="#fff" stopOpacity="0"/><stop offset=".5" stopColor="#fff" stopOpacity=".65"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></linearGradient>
-                <filter id={glow} x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
-            </defs>
-            <path ref={node => bodyRefs.current[0] = node} d={ribbonPaths[0]} fill="none" stroke="#8f7cff" strokeWidth="34" strokeLinecap="round" opacity=".1" filter={`url(#${glow})`}/>
-            <path ref={node => bodyRefs.current[1] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${ribbonGradient})`} strokeWidth="23" strokeLinecap="round"/>
-            <path ref={node => bodyRefs.current[2] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${sheen})`} strokeWidth="4" strokeLinecap="round" strokeDasharray="46 240" opacity=".46"/>
-        </svg>
-    </div>
+    return <section className="sp-hero" ref={heroRef} aria-labelledby="sp-title">
+        <div className="sp-hero-heading">
+            <h1 className="sp-title" id="sp-title"><span>Learn</span><span>Everything</span></h1>
+            <svg className="sp-pinwheel" ref={windmillRef} viewBox="0 0 120 120" aria-hidden="true">
+                <defs><linearGradient id={gradient} x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse"><stop stopColor="#ff8a0a"/><stop offset=".38" stopColor="#ffad8e"/><stop offset=".68" stopColor="#f2a3c8"/><stop offset="1" stopColor="#dda1ff"/></linearGradient></defs>
+                <g fill={`url(#${gradient})`}>{bladeAngles.map((angle, index) => <path key={angle} ref={node => bladeRefs.current[index] = node} d={bladePath(restShape, angle)}/>)}</g>
+            </svg>
+        </div>
+
+        <div className="sp-ribbon-row" aria-hidden="true">
+            <svg className="sp-ribbon" ref={ribbonRef} viewBox="0 0 180 220">
+                <defs>
+                    <linearGradient id={ribbonGradient} x1="36" y1="18" x2="144" y2="198" gradientUnits="userSpaceOnUse"><stop stopColor="#54dcff"/><stop offset=".34" stopColor="#7288ff"/><stop offset=".68" stopColor="#ad7cff"/><stop offset="1" stopColor="#ff8fc7"/></linearGradient>
+                    <linearGradient id={sheen} x1="38" y1="12" x2="137" y2="202" gradientUnits="userSpaceOnUse"><stop stopColor="#fff" stopOpacity="0"/><stop offset=".5" stopColor="#fff" stopOpacity=".65"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></linearGradient>
+                    <filter id={glow} x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+                </defs>
+                <path ref={node => bodyRefs.current[0] = node} d={ribbonPaths[0]} fill="none" stroke="#8f7cff" strokeWidth="34" strokeLinecap="round" opacity=".1" filter={`url(#${glow})`}/>
+                <path ref={node => bodyRefs.current[1] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${ribbonGradient})`} strokeWidth="23" strokeLinecap="round"/>
+                <path ref={node => bodyRefs.current[2] = node} d={ribbonPaths[0]} fill="none" stroke={`url(#${sheen})`} strokeWidth="4" strokeLinecap="round" strokeDasharray="46 240" opacity=".46"/>
+            </svg>
+        </div>
+
+        <div className="sp-hero-bottom">
+            <p className="sp-support"><span className="sp-support-brace" aria-hidden="true">{"{"}</span><span className="sp-support-copy">Practical courses for every skill you want to build next.</span><span className="sp-support-brace" aria-hidden="true">{"}"}</span></p>
+            <a className="sp-cta" href="#courses">Explore courses <Icon name="arrow" size={21}/></a>
+        </div>
+    </section>
 }
 
 function RetryButton({ children, busy, onClick, buttonRef }) {
@@ -249,9 +263,39 @@ function Catalog() {
 }
 
 const styles = `
-.sp-page{--sp-bg:#0e100f;--sp-paper:#fffce1;--sp-muted:#b8b5a2;--sp-line:#3b3e3c;box-sizing:border-box;width:100%;min-width:0;height:auto;background:var(--sp-bg);color:var(--sp-paper);font-family:var(--sp-font);font-style:var(--sp-font-style);font-weight:var(--sp-weight);container-type:inline-size;overflow:hidden}.sp-page *{box-sizing:border-box;letter-spacing:0}.sp-page a{color:inherit;text-decoration:none}.sp-page button,.sp-page input,.sp-page select{font:inherit}.sp-announcement{min-height:38px;background:var(--sp-brand);color:#07110a;display:grid;place-items:center;padding:8px 20px;font-size:13px;font-weight:700}.sp-header{height:90px;max-width:1600px;margin:auto;padding:0 clamp(20px,7vw,84px);display:flex;align-items:center;border-bottom:1px solid var(--sp-line);position:relative}.sp-brand{text-transform:uppercase;font-size:30px;font-weight:900;font-style:italic}.sp-nav{display:flex;gap:38px;margin-left:48px;color:var(--sp-muted)}.sp-nav a:hover,.sp-nav a:focus-visible{color:var(--sp-paper)}.sp-header-action,.sp-cta,.sp-retry{min-height:46px;border:1px solid currentColor;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;font-weight:700;background:transparent;color:inherit;cursor:pointer}.sp-header-action{margin-left:auto}.sp-menu{display:none;margin-left:auto;width:46px;height:46px;border:1px solid var(--sp-line);border-radius:50%;background:none;color:inherit;place-items:center}.sp-mobile-nav{display:none}.sp-hero{min-height:730px;position:relative;max-width:1600px;margin:auto;padding:70px clamp(20px,7vw,84px) 70px}.sp-title{font-size:clamp(78px,12vw,210px);line-height:.82;margin:25px 0 0;font-weight:600;letter-spacing:0}.sp-title span{display:block}.sp-title span:last-child{text-align:right}.sp-art-stage{position:absolute;inset:0;pointer-events:auto}.sp-pinwheel{position:absolute;width:clamp(110px,10vw,170px);left:22%;top:25px;transform-origin:center;will-change:transform}.sp-ribbon{position:absolute;width:clamp(95px,9vw,150px);right:20%;top:53%;will-change:transform}.sp-support{position:absolute;left:clamp(20px,9vw,140px);bottom:82px;display:flex;gap:18px;max-width:630px;font-size:clamp(20px,2vw,31px);line-height:1.2;margin:0}.sp-cta{position:absolute;right:clamp(20px,8vw,120px);bottom:72px;border-color:var(--sp-brand);background:var(--sp-brand);color:#07110a;min-width:190px}.sp-catalog{background:#f3f1e8;color:#151715;padding:105px clamp(20px,6vw,84px);container-type:inline-size}.sp-inner{max-width:1200px;margin:auto}.sp-section-heading{display:grid;grid-template-columns:1fr 2fr;gap:40px;margin-bottom:58px}.sp-kicker{font-family:ui-monospace,monospace;color:#48604e;margin:7px 0}.sp-section-heading h2,.sp-about h2{font-size:clamp(40px,5vw,76px);line-height:1;margin:0;letter-spacing:0}.sp-section-heading>div>p{color:#565a55;font-size:18px}.sp-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.38fr);gap:22px;margin-bottom:26px}.sp-field{display:grid;gap:9px;color:#555b55;font-size:14px}.sp-control{position:relative;display:flex;align-items:center}.sp-control>svg{position:absolute;left:16px;pointer-events:none}.sp-control input,.sp-control select{width:100%;height:62px;background:#fff;border:1px solid #c5c8c1;border-radius:7px;color:#151715;padding:0 50px;outline:none}.sp-control select{appearance:none;padding-left:18px;padding-right:48px}.sp-control input:focus,.sp-control select:focus{border-color:var(--sp-brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--sp-brand) 25%,transparent)}.sp-clear{position:absolute;right:10px;width:42px;height:42px;border:0;background:none;display:grid;place-items:center;cursor:pointer}.sp-select-icon{position:absolute;right:16px;display:grid;place-items:center;pointer-events:none}.sp-summary{min-height:24px;color:#5f645f;margin:0 0 20px}.sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.sp-card{min-height:305px;background:#fff;border:1px solid #d2d4ce;border-radius:7px;padding:25px;display:flex;flex-direction:column}.sp-card-meta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;color:#626761;font-size:13px;text-transform:uppercase}.sp-card-meta p{margin:0}.sp-card-meta span{background:color-mix(in srgb,var(--sp-brand) 28%,white);padding:4px 8px;border-radius:3px;color:#17361e;font-weight:700}.sp-card h3{font-size:24px;line-height:1.1;margin:34px 0 12px}.sp-description{color:#5c615c;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.sp-card-footer{margin-top:auto;padding-top:24px;border-top:1px solid #e0e1dc;display:flex;align-items:end;justify-content:space-between;gap:16px}.sp-type{margin:0;font-weight:700}.sp-type span{display:block;color:#6e736e;font-weight:400;font-size:12px;margin-bottom:4px}.sp-price{margin:0;text-align:right;font-size:18px;font-weight:800}.sp-notice,.sp-state{border:1px solid #bfc4bc;background:#fff;padding:20px;margin:0 0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}.sp-state{min-height:170px;justify-content:center;flex-direction:column;text-align:center}.sp-retry{border-radius:5px;min-height:44px;padding:0 18px;color:#151715}.sp-retry:disabled{opacity:.55;cursor:wait}.sp-spin{display:flex;animation:sp-spin 1s linear infinite}.sp-skeleton{gap:20px}.sp-skeleton i{height:16px;background:#e8e9e4;border-radius:3px}.sp-skeleton i:nth-child(2){height:30px;width:80%;margin-top:24px}.sp-skeleton i:nth-child(3){width:95%}.sp-skeleton i:nth-child(4){width:45%;margin-top:auto}.sp-about{padding:120px clamp(20px,8vw,120px);display:grid;grid-template-columns:1fr 2fr;gap:40px;background:#222522}.sp-about>div>p{font-size:20px;color:var(--sp-muted);max-width:660px;line-height:1.5;margin:32px 0 0}.sp-footer{padding:55px clamp(20px,7vw,84px);display:grid;grid-template-columns:1fr auto;gap:35px;border-top:1px solid var(--sp-line);align-items:center}.sp-footer nav{display:flex;gap:28px}.sp-footer>p{grid-column:1/-1;color:var(--sp-muted);margin:0}.sp-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@keyframes sp-spin{to{transform:rotate(360deg)}}
-@container (max-width:899px){.sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sp-title{font-size:clamp(72px,15vw,130px)}.sp-hero{min-height:650px}.sp-pinwheel{left:19%}.sp-ribbon{right:14%}}
-@container (max-width:599px){.sp-header{height:72px}.sp-nav,.sp-header-action{display:none}.sp-menu{display:grid}.sp-mobile-nav{display:flex;position:absolute;z-index:10;top:72px;left:20px;right:20px;background:#171a18;border:1px solid var(--sp-line);padding:18px;flex-direction:column;gap:4px;transform:translateY(-10px);opacity:0;pointer-events:none}.sp-mobile-nav[data-open=true]{transform:none;opacity:1;pointer-events:auto}.sp-mobile-nav a{padding:12px}.sp-hero{min-height:590px;padding-top:75px}.sp-title{font-size:clamp(58px,19vw,104px)}.sp-title span:last-child{text-align:left;margin-top:20px}.sp-pinwheel{width:88px;left:12%;top:8px}.sp-ribbon{width:75px;right:10%;top:42%}.sp-support{font-size:18px;bottom:126px;right:20px}.sp-cta{left:20px;right:auto;bottom:54px}.sp-catalog{padding-top:75px;padding-bottom:75px}.sp-section-heading,.sp-about{grid-template-columns:1fr;gap:18px}.sp-toolbar{grid-template-columns:1fr}.sp-grid{grid-template-columns:1fr}.sp-card{min-height:285px}.sp-notice{align-items:flex-start;flex-direction:column}.sp-footer{grid-template-columns:1fr}.sp-footer nav{flex-wrap:wrap}.sp-footer>p{grid-column:auto}}
+.sp-page{--sp-bg:#0e100f;--sp-paper:#fffce1;--sp-muted:#b8b5a2;--sp-line:#3b3e3c;box-sizing:border-box;width:100%;min-width:0;height:auto;background:var(--sp-bg);color:var(--sp-paper);font-family:var(--sp-font);font-style:var(--sp-font-style);font-weight:var(--sp-weight);container-type:inline-size;overflow:hidden}.sp-page *{box-sizing:border-box;letter-spacing:0}.sp-page a{color:inherit;text-decoration:none}.sp-page button,.sp-page input,.sp-page select{font:inherit}.sp-announcement{min-height:38px;background:var(--sp-brand);color:#07110a;display:grid;place-items:center;padding:8px 20px;font-size:13px;font-weight:700}.sp-header{height:90px;max-width:1600px;margin:auto;padding:0 clamp(20px,7vw,84px);display:flex;align-items:center;border-bottom:1px solid var(--sp-line);position:relative}.sp-brand{text-transform:uppercase;font-size:30px;font-weight:900;font-style:italic}.sp-nav{display:flex;gap:38px;margin-left:48px;color:var(--sp-muted)}.sp-nav a:hover,.sp-nav a:focus-visible{color:var(--sp-paper)}.sp-header-action,.sp-cta,.sp-retry{min-height:46px;border:1px solid currentColor;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;font-weight:700;background:transparent;color:inherit;cursor:pointer}.sp-header-action{margin-left:auto}.sp-menu{display:none;margin-left:auto;width:46px;height:46px;border:1px solid var(--sp-line);border-radius:50%;background:none;color:inherit;place-items:center}.sp-mobile-nav{display:none}.sp-catalog{background:#f3f1e8;color:#151715;padding:105px clamp(20px,6vw,84px);container-type:inline-size}.sp-inner{max-width:1200px;margin:auto}.sp-section-heading{display:grid;grid-template-columns:1fr 2fr;gap:40px;margin-bottom:58px}.sp-kicker{font-family:ui-monospace,monospace;color:#48604e;margin:7px 0}.sp-section-heading h2,.sp-about h2{font-size:clamp(40px,5vw,76px);line-height:1;margin:0;letter-spacing:0}.sp-section-heading>div>p{color:#565a55;font-size:18px}.sp-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.38fr);gap:22px;margin-bottom:26px}.sp-field{display:grid;gap:9px;color:#555b55;font-size:14px}.sp-control{position:relative;display:flex;align-items:center}.sp-control>svg{position:absolute;left:16px;pointer-events:none}.sp-control input,.sp-control select{width:100%;height:62px;background:#fff;border:1px solid #c5c8c1;border-radius:7px;color:#151715;padding:0 50px;outline:none}.sp-control select{appearance:none;padding-left:18px;padding-right:48px}.sp-control input:focus,.sp-control select:focus{border-color:var(--sp-brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--sp-brand) 25%,transparent)}.sp-clear{position:absolute;right:10px;width:42px;height:42px;border:0;background:none;display:grid;place-items:center;cursor:pointer}.sp-select-icon{position:absolute;right:16px;display:grid;place-items:center;pointer-events:none}.sp-summary{min-height:24px;color:#5f645f;margin:0 0 20px}.sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.sp-card{min-height:305px;background:#fff;border:1px solid #d2d4ce;border-radius:7px;padding:25px;display:flex;flex-direction:column}.sp-card-meta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;color:#626761;font-size:13px;text-transform:uppercase}.sp-card-meta p{margin:0}.sp-card-meta span{background:color-mix(in srgb,var(--sp-brand) 28%,white);padding:4px 8px;border-radius:3px;color:#17361e;font-weight:700}.sp-card h3{font-size:24px;line-height:1.1;margin:34px 0 12px}.sp-description{color:#5c615c;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.sp-card-footer{margin-top:auto;padding-top:24px;border-top:1px solid #e0e1dc;display:flex;align-items:end;justify-content:space-between;gap:16px}.sp-type{margin:0;font-weight:700}.sp-type span{display:block;color:#6e736e;font-weight:400;font-size:12px;margin-bottom:4px}.sp-price{margin:0;text-align:right;font-size:18px;font-weight:800}.sp-notice,.sp-state{border:1px solid #bfc4bc;background:#fff;padding:20px;margin:0 0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}.sp-state{min-height:170px;justify-content:center;flex-direction:column;text-align:center}.sp-retry{border-radius:5px;min-height:44px;padding:0 18px;color:#151715}.sp-retry:disabled{opacity:.55;cursor:wait}.sp-spin{display:flex;animation:sp-spin 1s linear infinite}.sp-skeleton{gap:20px}.sp-skeleton i{height:16px;background:#e8e9e4;border-radius:3px}.sp-skeleton i:nth-child(2){height:30px;width:80%;margin-top:24px}.sp-skeleton i:nth-child(3){width:95%}.sp-skeleton i:nth-child(4){width:45%;margin-top:auto}.sp-about{padding:120px clamp(20px,8vw,120px);display:grid;grid-template-columns:1fr 2fr;gap:40px;background:#222522}.sp-about>div>p{font-size:20px;color:var(--sp-muted);max-width:660px;line-height:1.5;margin:32px 0 0}.sp-footer{padding:55px clamp(20px,7vw,84px);display:grid;grid-template-columns:1fr auto;gap:35px;border-top:1px solid var(--sp-line);align-items:center}.sp-footer nav{display:flex;gap:28px}.sp-footer>p{grid-column:1/-1;color:var(--sp-muted);margin:0}.sp-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@keyframes sp-spin{to{transform:rotate(360deg)}}
+@container (max-width:899px){.sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (max-width:599px){.sp-header{height:72px}.sp-nav,.sp-header-action{display:none}.sp-menu{display:grid}.sp-mobile-nav{display:flex;position:absolute;z-index:10;top:72px;left:20px;right:20px;background:#171a18;border:1px solid var(--sp-line);padding:18px;flex-direction:column;gap:4px;transform:translateY(-10px);opacity:0;pointer-events:none}.sp-mobile-nav[data-open=true]{transform:none;opacity:1;pointer-events:auto}.sp-mobile-nav a{padding:12px}.sp-catalog{padding-top:75px;padding-bottom:75px}.sp-section-heading,.sp-about{grid-template-columns:1fr;gap:18px}.sp-toolbar{grid-template-columns:1fr}.sp-grid{grid-template-columns:1fr}.sp-card{min-height:285px}.sp-notice{align-items:flex-start;flex-direction:column}.sp-footer{grid-template-columns:1fr}.sp-footer nav{flex-wrap:wrap}.sp-footer>p{grid-column:auto}}
+
+/* Three-row hero: heading, ribbon, then support and CTA. */
+.sp-hero{display:grid;grid-template-rows:auto minmax(150px,1fr) auto;row-gap:16px;min-height:730px;position:relative;max-width:1600px;margin:auto;padding:70px clamp(32px,6cqw,84px)}
+.sp-hero-heading{position:relative;min-width:0}
+.sp-title{font-size:clamp(78px,12cqw,190px);line-height:.82;margin:25px 0 0;font-weight:600;letter-spacing:0;max-width:100%}
+.sp-title span{display:block}.sp-title span:last-child{text-align:right}
+.sp-pinwheel{position:absolute;width:clamp(110px,10cqw,170px);left:22%;top:-45px;transform-origin:center;will-change:transform}
+.sp-ribbon-row{display:flex;align-items:center;justify-content:flex-end;min-width:0;padding-right:18%}
+.sp-ribbon{position:static;width:clamp(72px,7cqw,104px);right:auto;top:auto;display:block;flex:none;will-change:transform}
+.sp-hero-bottom{display:flex;align-items:center;justify-content:space-between;gap:32px;min-width:0}
+.sp-support{position:static;display:flex;align-items:flex-start;gap:10px;max-width:630px;font-size:clamp(20px,2cqw,31px);line-height:1.2;margin:0;left:auto;right:auto;bottom:auto;min-width:0}
+.sp-support-brace{flex:none}.sp-support-copy{min-width:0}
+.sp-cta{position:static;right:auto;left:auto;bottom:auto;flex:none;border-color:var(--sp-brand);background:var(--sp-brand);color:#07110a;min-width:190px}
+
+@container (max-width:899px){
+  .sp-hero{grid-template-rows:auto minmax(110px,1fr) auto;row-gap:14px;min-height:650px;padding:60px 32px 52px}
+  .sp-title{font-size:clamp(64px,13cqw,104px)}
+  .sp-pinwheel{width:clamp(100px,10cqw,140px);left:19%;top:-45px}
+  .sp-ribbon-row{padding-right:14%}.sp-ribbon{width:68px}
+  .sp-hero-bottom{flex-direction:column;justify-content:flex-end;align-items:center;gap:28px;text-align:center}
+  .sp-support{font-size:21px;justify-content:center}
+}
+
+@container (max-width:599px){
+  .sp-hero{grid-template-rows:auto minmax(90px,1fr) auto;row-gap:12px;min-height:590px;padding:65px 24px 48px}
+  .sp-title{font-size:clamp(46px,14cqw,68px);margin-top:0}.sp-title span:last-child{text-align:left;margin-top:16px}
+  .sp-pinwheel{width:88px;left:12%;top:-57px}
+  .sp-ribbon-row{padding-right:10%}.sp-ribbon{width:58px}
+  .sp-hero-bottom{gap:24px}.sp-support{width:100%;font-size:18px;text-align:left}.sp-cta{min-width:190px}
+}
 @media(prefers-reduced-motion:reduce){.sp-page *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 `
 
@@ -269,7 +313,7 @@ export default function SkillpathPage({ brandColor = "#0ae448", typography, styl
         <style>{styles}</style>
         <aside className="sp-announcement" aria-label="Announcement">Learn without limits. Build what comes next.</aside>
         <header className="sp-header"><a className="sp-brand" href="#home" aria-label="Skillpath home">Skillpath</a><nav className="sp-nav" aria-label="Primary navigation"><a href="#courses">Courses</a><a href="#about">Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav><a className="sp-header-action" href="#courses">Explore courses</a><button className="sp-menu" type="button" aria-expanded={menuOpen} aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(value => !value)}><Icon name={menuOpen ? "close" : "menu"} size={22}/></button><nav className="sp-mobile-nav" data-open={menuOpen} aria-label="Mobile navigation"><a href="#courses" onClick={() => setMenuOpen(false)}>Courses</a><a href="#about" onClick={() => setMenuOpen(false)}>Why Skillpath</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav></header>
-        <section className="sp-hero" aria-labelledby="sp-title"><h1 className="sp-title" id="sp-title"><span>Learn</span><span>Everything</span></h1><HeroArt idPrefix={uid}/><p className="sp-support"><span aria-hidden="true">{"{"}</span><span>Practical courses for every skill you want to build next.</span><span aria-hidden="true">{"}"}</span></p><a className="sp-cta" href="#courses">Explore courses <Icon name="arrow" size={21}/></a></section>
+        <Hero idPrefix={uid}/>
         <main><Catalog/><section className="sp-about" id="about" aria-labelledby="sp-about-title"><p className="sp-kicker">{"{"} Why Skillpath {"}"}</p><div><h2 id="sp-about-title">Learning that keeps pace with where you are going.</h2><p>Clear course information, transparent regional pricing, and practical subjects make it easier to choose the right next step.</p></div></section></main>
         <footer className="sp-footer"><a className="sp-brand" href="#home">Skillpath</a><nav aria-label="Footer navigation"><a href="#home">Home</a><a href="#courses">Courses</a><a href="https://github.com/iamsankeerth/skillpath-framer-assignment" target="_blank" rel="noreferrer">Repository</a></nav><p>© 2026 Skillpath. Built for the Webveda assignment.</p></footer>
     </div>

@@ -35,7 +35,18 @@ try {
   assert(source.includes("@framerSupportedLayoutHeight auto"), "Missing Framer height annotation")
   assert(source.includes("@framerIntrinsicWidth 1200"), "Missing intrinsic width annotation")
 
-  for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+  const viewports = [
+    ["desktop", { width: 1440, height: 900 }],
+    ["wide", { width: 1160, height: 900 }],
+    ["desktop-edge", { width: 900, height: 900 }],
+    ["medium-edge", { width: 899, height: 900 }],
+    ["medium", { width: 768, height: 900 }],
+    ["compact-edge", { width: 600, height: 900 }],
+    ["mobile-edge", { width: 599, height: 844 }],
+    ["mobile", { width: 390, height: 844 }],
+  ]
+
+  for (const [name, viewport] of viewports) {
     const context = await browser.newContext({ viewport, reducedMotion: "no-preference" })
     const page = await context.newPage()
     const errors = []
@@ -54,8 +65,54 @@ try {
     assert(await page.locator(".sp-ribbon").count() === 1, "Ribbon artwork is missing")
     assert(await page.locator(".sp-card:not(.sp-skeleton)").count() === 3, "Course cards did not render")
     assert(await page.locator(".sp-price").first().innerText() === "₹1,999", "INR formatting is incorrect")
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
-    assert(!overflow, `${name} has horizontal overflow`)
+    const layout = await page.evaluate(() => {
+      const rect = selector => document.querySelector(selector)?.getBoundingClientRect()
+      const overlaps = (a, b) => Boolean(a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top)
+      const hero = rect(".sp-hero")
+      const title = rect(".sp-title")
+      const ribbon = rect(".sp-ribbon")
+      const bottom = rect(".sp-hero-bottom")
+      const support = rect(".sp-support")
+      const cta = rect(".sp-cta")
+      const copy = rect(".sp-support-copy")
+      const braces = [...document.querySelectorAll(".sp-support-brace")].map(node => node.getBoundingClientRect())
+      const children = [...document.querySelector(".sp-hero").children].map(node => node.className)
+
+      return {
+        children,
+        ribbonPosition: getComputedStyle(document.querySelector(".sp-ribbon")).position,
+        supportPosition: getComputedStyle(document.querySelector(".sp-support")).position,
+        ctaPosition: getComputedStyle(document.querySelector(".sp-cta")).position,
+        ribbonTitleOverlap: overlaps(ribbon, title),
+        ribbonBottomOverlap: overlaps(ribbon, bottom),
+        supportCtaOverlap: overlaps(support, cta),
+        braceCopyOverlap: braces.some(brace => overlaps(brace, copy)),
+        leftBraceGap: copy && braces[0] ? copy.left - braces[0].right : 0,
+        rightBraceGap: copy && braces[1] ? braces[1].left - copy.right : 0,
+        titleInsideHero: title && hero ? title.left >= hero.left && title.right <= hero.right : false,
+        ctaCenterDifference: cta && hero ? Math.abs((cta.left + cta.right) / 2 - (hero.left + hero.right) / 2) : Infinity,
+        overflow: document.documentElement.scrollWidth > innerWidth,
+      }
+    })
+    assert(JSON.stringify(layout.children) === JSON.stringify(["sp-hero-heading", "sp-ribbon-row", "sp-hero-bottom"]), `${name} hero does not have the three direct grid rows`)
+    assert(layout.ribbonPosition !== "absolute", `${name} ribbon still uses absolute positioning`)
+    assert(layout.supportPosition !== "absolute", `${name} support still uses absolute positioning`)
+    assert(layout.ctaPosition !== "absolute", `${name} CTA still uses absolute positioning`)
+    assert(!layout.ribbonTitleOverlap, `${name} ribbon overlaps the title`)
+    assert(!layout.ribbonBottomOverlap, `${name} ribbon overlaps the hero bottom row`)
+    assert(!layout.supportCtaOverlap, `${name} support overlaps the CTA`)
+    assert(!layout.braceCopyOverlap, `${name} braces overlap the support copy`)
+    assert(layout.leftBraceGap >= 8 && layout.rightBraceGap >= 8, `${name} braces are not kept close to the copy`)
+    assert(layout.titleInsideHero, `${name} title escapes the hero gutters`)
+    assert(!layout.overflow, `${name} has horizontal overflow`)
+    if (viewport.width <= 899) assert(layout.ctaCenterDifference <= 2, `${name} CTA is not centered`)
+
+    if (["desktop", "wide", "medium", "mobile"].includes(name)) {
+      const screenshot = join(tmpdir(), `skillpath-framer-${name}.png`)
+      await page.screenshot({ path: screenshot, fullPage: true })
+      console.log(`${name} screenshot: ${screenshot}`)
+    }
+
     if (name === "desktop") {
       await page.evaluate(() => window.__setSkillpathProps({ brandColor: "#ff3366", typography: { fontFamily: "Georgia", fontWeight: 700, fontStyle: "normal" } }))
       await page.waitForTimeout(100)
@@ -69,13 +126,10 @@ try {
       await search.press("Escape")
       await page.locator("select").selectOption("price-low")
       assert((await page.locator(".sp-card h3").allInnerTexts())[0] === "Modern JavaScript", "Price sorting failed")
-    } else {
+    } else if (name === "mobile") {
       await page.locator(".sp-menu").click()
       assert(await page.locator(".sp-mobile-nav").getAttribute("data-open") === "true", "Mobile navigation did not open")
     }
-    const screenshot = join(tmpdir(), `skillpath-framer-${name}.png`)
-    await page.screenshot({ path: screenshot, fullPage: true })
-    console.log(`${name} screenshot: ${screenshot}`)
     assert(errors.length === 0, `${name} browser errors: ${errors.join(" | ")}`)
     await context.close()
   }
