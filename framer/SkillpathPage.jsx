@@ -267,6 +267,8 @@ const styles = `
 @container (max-width:899px){.sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @container (max-width:599px){.sp-header{height:72px}.sp-nav,.sp-header-action{display:none}.sp-menu{display:grid}.sp-mobile-nav{display:flex;position:absolute;z-index:10;top:72px;left:20px;right:20px;background:#171a18;border:1px solid var(--sp-line);padding:18px;flex-direction:column;gap:4px;transform:translateY(-10px);opacity:0;pointer-events:none}.sp-mobile-nav[data-open=true]{transform:none;opacity:1;pointer-events:auto}.sp-mobile-nav a{padding:12px}.sp-catalog{padding-top:75px;padding-bottom:75px}.sp-section-heading,.sp-about{grid-template-columns:1fr;gap:18px}.sp-toolbar{grid-template-columns:1fr}.sp-grid{grid-template-columns:1fr}.sp-card{min-height:285px}.sp-notice{align-items:flex-start;flex-direction:column}.sp-footer{grid-template-columns:1fr}.sp-footer nav{flex-wrap:wrap}.sp-footer>p{grid-column:auto}}
 
+.sp-section-heading>div>p{margin:clamp(20px,2cqw,28px) 0 0}
+
 /* Three-row hero: heading, ribbon, then support and CTA. */
 .sp-hero{display:grid;grid-template-rows:auto minmax(150px,1fr) auto;row-gap:16px;min-height:730px;position:relative;max-width:1600px;margin:auto;padding:70px clamp(32px,6cqw,84px)}
 .sp-hero-heading{position:relative;min-width:0}
