@@ -13,6 +13,8 @@ The current website pairs a GSAP-inspired `Learn Everything` hero with a functio
 - [Readable conversation website](./html/conversation.html)
 - [Assignment brief](<./docs/Assignment for the junior developer role.pdf>)
 
+I could not embed my complete Codex chat directly in the README, so I exported the conversation and created a small website where reviewers can read the full chat.
+
 ## Run Locally
 
 ```bash
