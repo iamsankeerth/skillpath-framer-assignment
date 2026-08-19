@@ -9,7 +9,7 @@ The current website pairs a GSAP-inspired `Learn Everything` hero with a functio
 - [Published Framer site](https://cheerful-board-868178.framer.app/)
 - [Public GitHub repository](https://github.com/iamsankeerth/skillpath-framer-assignment)
 - [Submission details](./docs/SUBMISSION.md)
-- [Shared AI conversation](./docs/AI_CONVERSATION.md) ([website PR #6](https://github.com/iamsankeerth/skillpath-framer-assignment/pull/6))
+- [Shared AI conversation](./docs/AI_CONVERSATION.md) ([conversation website](https://skillpath-framer-assignment-gn2nkffhl-iamsankeerths-projects.vercel.app/))
 - [Readable conversation website](./html/conversation.html)
 - [Assignment brief](<./docs/Assignment for the junior developer role.pdf>)
 
