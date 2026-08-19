@@ -13,6 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: fileURLToPath(new URL("./index.html", import.meta.url)),
+        conversation: fileURLToPath(new URL("./html/conversation.html", import.meta.url)),
         framer: fileURLToPath(new URL("./html/framer-preview.html", import.meta.url)),
       },
     },

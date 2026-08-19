@@ -10,6 +10,7 @@ The current website pairs a GSAP-inspired `Learn Everything` hero with a functio
 - [Public GitHub repository](https://github.com/iamsankeerth/skillpath-framer-assignment)
 - [Submission details](./docs/SUBMISSION.md)
 - [Shared AI conversation](./docs/AI_CONVERSATION.md)
+- [Readable conversation website](./html/conversation.html)
 - [Assignment brief](<./docs/Assignment for the junior developer role.pdf>)
 
 ## Run Locally
@@ -24,6 +25,7 @@ Production and test checks:
 ```bash
 npm run test
 npm run build
+npm run qa:conversation
 npm run qa:framer
 ```
 
@@ -47,6 +49,7 @@ npm run qa:framer
 - `src/styles.css` contains the current CSS-variable design layer.
 - `framer/SkillpathPage.jsx` is the self-contained full-page component copied into Framer.
 - `html/framer-preview.html` and `src/framerShim.js` render that exact source locally for verification.
+- `html/conversation.html` renders the complete AI transcript with tool calls and outputs expanded.
 - [Functional plan](./docs/PLAN.md) records the acceptance contract.
 - [Domain glossary](./docs/CONTEXT.md) defines project terminology.
 
