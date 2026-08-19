@@ -50,6 +50,7 @@ npm run qa:framer
 - `framer/SkillpathPage.jsx` is the self-contained full-page component copied into Framer.
 - `html/framer-preview.html` and `src/framerShim.js` render that exact source locally for verification.
 - `html/conversation.html` renders the complete AI transcript with tool calls and outputs expanded.
+- `vercel.json` serves the conversation website at the Vercel root URL without replacing the assignment entry point.
 - [Functional plan](./docs/PLAN.md) records the acceptance contract.
 - [Domain glossary](./docs/CONTEXT.md) defines project terminology.
 
