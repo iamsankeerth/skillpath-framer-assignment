@@ -12,9 +12,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        app: fileURLToPath(new URL("./index.html", import.meta.url)),
-        conversation: fileURLToPath(new URL("./html/conversation.html", import.meta.url)),
+        conversation: fileURLToPath(new URL("./index.html", import.meta.url)),
+        conversationArchive: fileURLToPath(new URL("./html/conversation.html", import.meta.url)),
         framer: fileURLToPath(new URL("./html/framer-preview.html", import.meta.url)),
+        skillpath: fileURLToPath(new URL("./html/skillpath.html", import.meta.url)),
       },
     },
   },

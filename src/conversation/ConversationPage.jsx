@@ -25,7 +25,7 @@ export function ConversationPage() {
     <div className="conversation-page">
       <header className="conversation-header">
         <div className="conversation-header-inner">
-          <a className="back-link" href="/" aria-label="Back to Skillpath">
+          <a className="back-link" href="/html/skillpath.html" aria-label="Open Skillpath">
             <ArrowLeft aria-hidden="true" size={18} strokeWidth={2} />
             <span>Skillpath</span>
           </a>

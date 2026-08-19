@@ -2,7 +2,7 @@ import { chromium } from "playwright"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 
-const baseUrl = process.env.QA_URL || "http://127.0.0.1:4173/"
+const baseUrl = process.env.QA_URL || "http://127.0.0.1:4173/html/skillpath.html"
 const browser = await chromium.launch({ headless: true })
 
 const readPinwheelState = () => {
