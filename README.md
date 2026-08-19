@@ -9,7 +9,8 @@ The current website pairs a GSAP-inspired `Learn Everything` hero with a functio
 - [Published Framer site](https://cheerful-board-868178.framer.app/)
 - [Public GitHub repository](https://github.com/iamsankeerth/skillpath-framer-assignment)
 - [Submission details](./docs/SUBMISSION.md)
-- [Shared AI conversation](./docs/AI_CONVERSATION.md)
+- [Shared AI conversation](./docs/AI_CONVERSATION.md) ([website PR #6](https://github.com/iamsankeerth/skillpath-framer-assignment/pull/6))
+- [Readable conversation website](./html/conversation.html)
 - [Assignment brief](<./docs/Assignment for the junior developer role.pdf>)
 
 ## Run Locally
@@ -24,6 +25,7 @@ Production and test checks:
 ```bash
 npm run test
 npm run build
+npm run qa:conversation
 npm run qa:framer
 ```
 
@@ -47,6 +49,8 @@ npm run qa:framer
 - `src/styles.css` contains the current CSS-variable design layer.
 - `framer/SkillpathPage.jsx` is the self-contained full-page component copied into Framer.
 - `html/framer-preview.html` and `src/framerShim.js` render that exact source locally for verification.
+- `index.html` renders the complete AI transcript at the deployed root, with tool calls and outputs expanded.
+- `html/skillpath.html` preserves the original Vite Skillpath assignment entry point.
 - [Functional plan](./docs/PLAN.md) records the acceptance contract.
 - [Domain glossary](./docs/CONTEXT.md) defines project terminology.
 
