@@ -4,11 +4,14 @@
 
 - Published Framer URL: https://cheerful-board-868178.framer.app/
 - Public repository: https://github.com/iamsankeerth/skillpath-framer-assignment
-- Shared AI conversation: https://github.com/iamsankeerth/skillpath-framer-assignment/blob/10495d1/AI_CONVERSATION.md
+- Submission document (this file): https://github.com/iamsankeerth/skillpath-framer-assignment/blob/main/SUBMISSION.md
+- Conversation website: https://htmlpreview.github.io/?https://github.com/iamsankeerth/skillpath-framer-assignment/blob/main/docs/index.html
+- GitHub Pages (turn on Pages → `main` → `/docs` if you want a `github.io` URL): https://iamsankeerth.github.io/skillpath-framer-assignment/
+- Shared AI conversation (markdown backup): https://github.com/iamsankeerth/skillpath-framer-assignment/blob/main/AI_CONVERSATION.md
 
 ## AI Disclosure
 
-AI-assisted planning, implementation, testing, and design-reference analysis were used. Final review and submission decisions remain the developer's responsibility.
+I used **OpenAI Codex** as the main coding agent and **Cursor** to review the Framer page, GitHub history, and this submission. I started Codex with **Matt Pocock’s Grill with Docs** skill so it asked one assignment question at a time and I answered from the brief (live GET APIs, four catalog states, two property controls, no hardcoded data). I accepted the catalog fetch, `pricePaise` / `priceUsdCents` divided by 100, independent course and pricing retries, search/sort, and Brand Colour plus Typography. I changed the hero when mobile layout broke (pinwheel, ribbon, three-row grid), retargeted PR #3 onto `main` instead of the stacked hero branch, and treated canvas property controls—not the published-site pen—as how designers edit the page.
 
 ## Reflection
 

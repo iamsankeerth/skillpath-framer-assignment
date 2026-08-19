@@ -54,3 +54,7 @@ The component exposes exactly two controls: `Brand Colour` uses `ControlType.Col
 The portable component has no GSAP, Lucide, Three.js, or stylesheet import. Its browser-native animation, styles, data behavior, and SVG art are all contained in the one file. The local build and Playwright harness validate the exact source; final Framer canvas and published-page verification must be completed inside Framer.
 
 The original assignment brief is intentionally not included in this public repository.
+
+## Submission
+
+The hand-in note, AI disclosure, and links live in [SUBMISSION.md](./SUBMISSION.md). The Codex planning chat is rendered as a webpage in [docs/index.html](./docs/index.html).
