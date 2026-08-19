@@ -6,7 +6,7 @@ import { join } from "node:path"
 import { tmpdir } from "node:os"
 
 const port = 4187
-const url = `http://127.0.0.1:${port}/framer-preview.html`
+const url = `http://127.0.0.1:${port}/html/framer-preview.html`
 const vite = fileURLToPath(new URL("../node_modules/vite/bin/vite.js", import.meta.url))
 const server = spawn(process.execPath, [vite, "preview", "--host", "127.0.0.1", "--port", String(port)], { stdio: "ignore" })
 const courses = [

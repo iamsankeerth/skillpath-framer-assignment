@@ -4,6 +4,14 @@ Skillpath landing page and live Course Catalog for the Webveda junior developer 
 
 The current website pairs a GSAP-inspired `Learn Everything` hero with a functional catalog. Course and Pricing Region requests remain independent: when pricing fails, every course stays visible with `Price unavailable` and a dedicated retry action.
 
+## Submission
+
+- [Published Framer site](https://cheerful-board-868178.framer.app/)
+- [Public GitHub repository](https://github.com/iamsankeerth/skillpath-framer-assignment)
+- [Submission details](./docs/SUBMISSION.md)
+- [Shared AI conversation](./docs/AI_CONVERSATION.md)
+- [Assignment brief](<./docs/Assignment for the junior developer role.pdf>)
+
 ## Run Locally
 
 ```bash
@@ -38,9 +46,9 @@ npm run qa:framer
 - `src/courseData.js` contains API, validation, search, sorting, and price helpers.
 - `src/styles.css` contains the current CSS-variable design layer.
 - `framer/SkillpathPage.jsx` is the self-contained full-page component copied into Framer.
-- `framer-preview.html` and `src/framerShim.js` render that exact source locally for verification.
-- [Functional plan](./PLAN.md) records the acceptance contract.
-- [Domain glossary](./CONTEXT.md) defines project terminology.
+- `html/framer-preview.html` and `src/framerShim.js` render that exact source locally for verification.
+- [Functional plan](./docs/PLAN.md) records the acceptance contract.
+- [Domain glossary](./docs/CONTEXT.md) defines project terminology.
 
 ## Framer Setup
 
@@ -53,4 +61,4 @@ The component exposes exactly two controls: `Brand Colour` uses `ControlType.Col
 
 The portable component has no GSAP, Lucide, Three.js, or stylesheet import. Its browser-native animation, styles, data behavior, and SVG art are all contained in the one file. The local build and Playwright harness validate the exact source; final Framer canvas and published-page verification must be completed inside Framer.
 
-The original assignment brief is intentionally not included in this public repository.
+Supporting documentation and the original assignment brief are organized under `docs/`.

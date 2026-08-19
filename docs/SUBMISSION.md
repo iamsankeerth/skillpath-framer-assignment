@@ -4,7 +4,7 @@
 
 - Published Framer URL: https://cheerful-board-868178.framer.app/
 - Public repository: https://github.com/iamsankeerth/skillpath-framer-assignment
-- Shared AI conversation: https://github.com/iamsankeerth/skillpath-framer-assignment/blob/10495d1/AI_CONVERSATION.md
+- Shared AI conversation: https://github.com/iamsankeerth/skillpath-framer-assignment/blob/main/docs/AI_CONVERSATION.md
 
 ## AI Disclosure
 

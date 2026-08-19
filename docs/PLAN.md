@@ -79,7 +79,7 @@ Changing either property must update the page without triggering a Course Catalo
 
 - `framer/SkillpathPage.jsx` is the source of truth copied into Framer.
 - `src/framerShim.js` implements only the small local surface needed to import that exact file in Vite.
-- `framer-preview.html` renders the exact Framer source for local visual and behavior QA.
+- `html/framer-preview.html` renders the exact Framer source for local visual and behavior QA.
 - `npm run build` must import and compile the component.
 - `npm run qa:framer` must verify the two property controls, property updates without data refetching, desktop/mobile behavior, live-data states, search, sorting, unique art, and reduced motion.
 - The final release still requires importing the file into Framer itself and checking the canvas, preview, and published page.
